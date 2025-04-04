@@ -19,11 +19,8 @@ def get_input(prompt, default=None, input_type=str):
         return float(user_input) if user_input.strip() else default
     else:
         return user_input if user_input.strip() else default
-
 def main():
     print("====== GENOMIC INTERACTION PREDICTION - INTERACTIVE USER TESTING ======")
-    
-   
     try:
         with open('models/random_forest_model.pkl', 'rb') as f:
             model = pickle.load(f)

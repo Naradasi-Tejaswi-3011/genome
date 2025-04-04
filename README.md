@@ -29,26 +29,6 @@ The genomic interactions dataset contains 81,203 interactions with multiple feat
 - **P-values**: CG1_p_value, CG2_p_value, etc. (used for determining ground truth)
 - **Interaction types**: PP (promoter-promoter), PD (promoter-distal), DD (distal-distal)
 
-## Usage
-
-### Training the Model
-
-```bash
-python scripts/genomic_classification.py
-```
-
-### Making Predictions
-
-To predict using the sample test data:
-```bash
-python scripts/simple_predict.py
-```
-
-To run the interactive demo:
-```bash
-python scripts/user_predict_demo.py
-```
-
 ## Model Performance
 
 The Random Forest model achieves approximately 90% accuracy on the test set. The most important features for prediction are:
@@ -67,6 +47,3 @@ The Random Forest model achieves approximately 90% accuracy on the test set. The
 - seaborn
 - imbalanced-learn
 
-## Author
-
-This project was created as a mini-project for genomic data analysis. 

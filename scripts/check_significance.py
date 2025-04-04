@@ -2,14 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Define the threshold for significance
 P_VALUE_THRESHOLD = 0.005
 
-# Load the dataset
 file_path = "data/Copy of dataset.xlsx"
 df = pd.read_excel(file_path)
 
-# Create target variables based on p-value threshold
 df['is_significant_CG'] = ((df['CG1_p_value'] < P_VALUE_THRESHOLD) & 
                           (df['CG2_p_value'] < P_VALUE_THRESHOLD)).astype(int)
 df['is_significant_CC'] = ((df['CC1_p_value'] < P_VALUE_THRESHOLD) & 
@@ -17,7 +14,7 @@ df['is_significant_CC'] = ((df['CC1_p_value'] < P_VALUE_THRESHOLD) &
 df['is_significant_CN'] = ((df['CN1_p_value'] < P_VALUE_THRESHOLD) & 
                           (df['CN2_p_value'] < P_VALUE_THRESHOLD)).astype(int)
 
-# Check distribution of significant interactions for each condition
+
 print(f"\nDistribution for Gemcitabine (CG) at p-value threshold {P_VALUE_THRESHOLD}:")
 print(df['is_significant_CG'].value_counts())
 print(f"Percentage significant: {df['is_significant_CG'].mean() * 100:.2f}%")
@@ -30,14 +27,14 @@ print(f"\nDistribution for Normal (CN) at p-value threshold {P_VALUE_THRESHOLD}:
 print(df['is_significant_CN'].value_counts())
 print(f"Percentage significant: {df['is_significant_CN'].mean() * 100:.2f}%")
 
-# Check correlation between significance and IntGroup
+
 print("\nRelationship between IntGroup and significance:")
 for condition in ['CG', 'CC', 'CN']:
     print(f"\n{condition} - Distribution by IntGroup:")
     sig_col = f'is_significant_{condition}'
     print(pd.crosstab(df['IntGroup'], df[sig_col], normalize='index') * 100)
 
-# Visualize the distribution for CG (Gemcitabine)
+
 plt.figure(figsize=(12, 5))
 
 plt.subplot(1, 2, 1)
@@ -56,7 +53,6 @@ plt.tight_layout()
 plt.savefig('significance_distribution.png')
 print("\nVisualization saved as 'significance_distribution.png'")
 
-# Check supporting pairs distribution
 print("\nSupporting Pairs Statistics for Significant vs Non-significant interactions:")
 for condition in ['CG', 'CC', 'CN']:
     sig_col = f'is_significant_{condition}'

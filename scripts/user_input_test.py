@@ -12,7 +12,7 @@ def get_input(prompt, default=None, input_type=str):
     else:
         user_input = input(f"{prompt}: ")
     
-    # Convert to appropriate type
+
     if input_type == int:
         return int(user_input) if user_input.strip() else default
     elif input_type == float:
@@ -23,13 +23,13 @@ def get_input(prompt, default=None, input_type=str):
 def main():
     print("====== GENOMIC INTERACTION PREDICTION - INTERACTIVE USER TESTING ======")
     
-    # Load the model
+   
     try:
         with open('models/random_forest_model.pkl', 'rb') as f:
             model = pickle.load(f)
         print("Model loaded successfully")
 
-        # Optional: load a sample of the original data to help users with examples
+       
         try:
             data = pd.read_excel('data/genomic_interactions.xlsx', nrows=5)
             print("Loaded sample data for reference")
@@ -57,12 +57,11 @@ def main():
     while continue_testing:
         print("\n--- NEW PREDICTION ---")
         
-        # Collect user inputs
+       
         int_group = get_input("Enter Interaction Type (PP, PD, or DD)", "PP")
         strand = get_input("Enter Strand (+ or -)", "+")
         distance = get_input("Enter Distance (typical range: 1000-1000000)", 50000, int)
         
-        # Supporting pairs
         cg1_pairs = get_input("Enter Supporting Pairs CG1 (typical range: 0-150)", 50, int)
         cg2_pairs = get_input("Enter Supporting Pairs CG2 (typical range: 0-150)", 40, int)
         cc1_pairs = get_input("Enter Supporting Pairs CC1 (typical range: 0-150)", 60, int)
@@ -70,12 +69,10 @@ def main():
         cn1_pairs = get_input("Enter Supporting Pairs CN1 (typical range: 0-150)", 45, int)
         cn2_pairs = get_input("Enter Supporting Pairs CN2 (typical range: 0-150)", 40, int)
         
-        # Additional features
         nof_ints = get_input("Enter Number of Interactions (typical range: 1-10)", 2, int)
         annotation = get_input("Enter Annotation (0-3)", 1, int)
         interactor_annotation = get_input("Enter Interactor Annotation (0-3)", 2, int)
         
-        # Treatment indicators
         normal = get_input("Is it Normal tissue? (0=no, 1=yes)", 0, int)
         carboplatin = get_input("Is it Carboplatin Treated? (0=no, 1=yes)", 0, int)
         gemcitabine = get_input("Is it Gemcitabine Treated? (0=no, 1=yes)", 1, int)
@@ -114,13 +111,10 @@ def main():
             'log_distance': log_distance
         }
         
-        # Add to test data
         test_data.append(entry)
         
-        # Convert to DataFrame for prediction
         entry_df = pd.DataFrame([entry])
         
-        # Replace infinite values
         for col in entry_df.columns:
             if entry_df[col].dtype in ['float64', 'float32', 'int64', 'int32']:
                 entry_df[col] = entry_df[col].replace([np.inf, -np.inf], 0)
@@ -128,7 +122,6 @@ def main():
         
         print("\nProcessing input data...")
         
-        # Make prediction
         try:
             prediction = model.predict(entry_df)[0]
             probability = model.predict_proba(entry_df)[0][1]
@@ -154,15 +147,13 @@ def main():
             import traceback
             traceback.print_exc()
         
-        # Ask if user wants to continue
+        
         continue_input = input("\nWould you like to test another set of values? (y/n): ")
         continue_testing = continue_input.lower() == 'y'
     
-    # Combine all entries into one DataFrame
     if test_data:
         all_entries_df = pd.DataFrame(test_data)
         
-        # Save test data
         os.makedirs('results', exist_ok=True)
         filename = 'results/user_input_test_results.xlsx'
         all_entries_df.to_excel(filename, index=False)

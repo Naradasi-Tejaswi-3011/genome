@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genomic Interaction Predictor</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+      }
+      .header {
+        background: linear-gradient(135deg, #4a6baf 0%, #254e77 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        border: none;
+      }
+      .card-header {
+        background-color: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        border-radius: 10px 10px 0 0 !important;
+      }
+      .form-label {
+        font-weight: 500;
+        color: #475569;
+      }
+      .btn-primary {
+        background-color: #4a6baf;
+        border-color: #4a6baf;
+      }
+      .btn-primary:hover {
+        background-color: #254e77;
+        border-color: #254e77;
+      }
+      .result-card {
+        display: none;
+        transition: all 0.3s ease;
+      }
+      .result-card.show {
+        display: block;
+      }
+      .prediction-yes {
+        color: #10b981;
+        font-weight: bold;
+      }
+      .prediction-no {
+        color: #ef4444;
+        font-weight: bold;
+      }
+      .match {
+        color: #10b981;
+      }
+      .no-match {
+        color: #ef4444;
+      }
+      .probability-bar {
+        height: 20px;
+        background-color: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 5px;
+      }
+      .probability-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4a6baf 0%, #254e77 100%);
+        transition: width 0.5s ease;
+      }
+      .form-section {
+        margin-bottom: 1.5rem;
+      }
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="container">
+        <h1 class="display-4">Genomic Interaction Predictor</h1>
+        <p class="lead">
+          Predict whether genomic interactions are significant based on
+          supporting pairs, distance, and other features.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <i class="bi bi-input-cursor-text me-2"></i>Input Parameters
+            </div>
+            <div class="card-body">
+              <form id="predictionForm">
+                <div class="form-section">
+                  <div class="section-title">Basic Information</div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="IntGroup" class="form-label"
+                        >Interaction Type</label
+                      >
+                      <select
+                        class="form-select"
+                        id="IntGroup"
+                        name="IntGroup"
+                        required
+                      >
+                        <option value="PP">PP (Promoter-Promoter)</option>
+                        <option value="PD">PD (Promoter-Distal)</option>
+                        <option value="DD">DD (Distal-Distal)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="Strand" class="form-label">Strand</label>
+                      <select
+                        class="form-select"
+                        id="Strand"
+                        name="Strand"
+                        required
+                      >
+                        <option value="+">+</option>
+                        <option value="-">-</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="distance" class="form-label">Distance</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="distance"
+                        name="distance"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="NofInts" class="form-label"
+                        >Number of Interactions</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="NofInts"
+                        name="NofInts"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="section-title">Supporting Pairs</div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="CG1_SuppPairs" class="form-label"
+                        >CG1 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CG1_SuppPairs"
+                        name="CG1_SuppPairs"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="CG2_SuppPairs" class="form-label"
+                        >CG2 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CG2_SuppPairs"
+                        name="CG2_SuppPairs"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="CC1_SuppPairs" class="form-label"
+                        >CC1 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CC1_SuppPairs"
+                        name="CC1_SuppPairs"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="CC2_SuppPairs" class="form-label"
+                        >CC2 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CC2_SuppPairs"
+                        name="CC2_SuppPairs"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="CN1_SuppPairs" class="form-label"
+                        >CN1 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CN1_SuppPairs"
+                        name="CN1_SuppPairs"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="CN2_SuppPairs" class="form-label"
+                        >CN2 Supporting Pairs</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="CN2_SuppPairs"
+                        name="CN2_SuppPairs"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <div class="section-title">Annotations</div>
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="Annotation" class="form-label"
+                        >Annotation</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="Annotation"
+                        name="Annotation"
+                        required
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="InteractorAnnotation" class="form-label"
+                        >Interactor Annotation</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="InteractorAnnotation"
+                        name="InteractorAnnotation"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary me-md-2"
+                    id="loadSampleBtn"
+                  >
+                    <i class="bi bi-download me-1"></i> Load Sample
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i> Predict
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card result-card" id="resultCard">
+            <div class="card-header">
+              <i class="bi bi-graph-up me-2"></i>Prediction Result
+            </div>
+            <div class="card-body">
+              <div class="mb-4">
+                <h5>Predicted Significance:</h5>
+                <h3 id="predictionResult" class="mb-3"></h3>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <i class="bi bi-info-circle me-2"></i>About
+                </div>
+                <div class="card-body">
+                  <p>
+                    This tool uses a Random Forest model to predict whether genomic
+                    interactions are significant based on supporting pairs,
+                    distance, and other features.
+                  </p>
+                  <p>
+                    The model achieves approximately 90% accuracy on the test set.
+                  </p>
+                  <p>Key features for prediction:</p>
+                  <ul>
+                    <li>Supporting pair counts</li>
+                    <li>Number of interactions</li>
+                    <li>Distance between interacting regions</li>
+                    <li>Supporting pairs ratio between replicates</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-light py-4 mt-5">
+      <div class="container text-center">
+        <p class="mb-0">Genomic Interaction Predictor &copy; 2025</p>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("predictionForm");
+        const resultCard = document.getElementById("resultCard");
+        const predictionResult = document.getElementById("predictionResult");
+        const loadSampleBtn = document.getElementById("loadSampleBtn");
+
+        // Load a random sample from the dataset
+        loadSampleBtn.addEventListener("click", function () {
+          fetch("/sample")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                alert("Error loading sample: " + data.error);
+                return;
+              }
+
+              // Fill the form with sample data
+              for (const [key, value] of Object.entries(data)) {
+                const input = document.getElementById(key);
+                if (input) {
+                  input.value = value;
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error loading sample data");
+            });
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+
+          fetch("/predict", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                alert("Error: " + data.error);
+                return;
+              }
+
+              // Display the result
+              resultCard.classList.add("show");
+
+              // Set prediction result
+              predictionResult.textContent = data.prediction;
+              predictionResult.className =
+                data.prediction === "YES" ? "prediction-yes" : "prediction-no";
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error making prediction");
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
